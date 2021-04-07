@@ -16,7 +16,12 @@ type alias Box =
 
 
 type alias Ball =
-    { x : Float, y : Float, speed : Float, length : Float }
+    { x : Float
+    , y : Float
+    , speedX : Float
+    , speedY : Float
+    , length : Float
+    }
 
 
 box : Box
@@ -26,7 +31,7 @@ box =
 
 ball : Ball
 ball =
-    { x = 0, y = 0, speed = 8, length = 20 }
+    { x = 0, y = 0, speedX = 5, speedY = 5, length = 20 }
 
 
 memory : Memory
@@ -84,11 +89,67 @@ drawBox box2 =
 
 update : Computer -> Memory -> Memory
 update computer memory2 =
-    { ball =
-        { x = memory2.ball.x + (toX computer.keyboard * memory2.ball.speed)
-        , y = memory2.ball.y + (toY computer.keyboard * memory2.ball.speed)
-        , speed = memory2.ball.speed
-        , length = memory2.ball.length
+    let
+        halfWidth =
+            memory2.box.width / 2
+
+        halfHeight =
+            memory2.box.height / 2
+    in
+    if memory2.ball.x >= halfWidth && memory2.ball.speedX > 0 then
+        { ball =
+            { x = memory2.ball.x + memory2.ball.speedX
+            , y = memory2.ball.y + memory2.ball.speedY
+
+            -- , x = memory2.ball.x + (toX computer.keyboard * memory2.ball.speed)
+            -- , y = memory2.ball.y + (toY computer.keyboard * memory2.ball.speed)
+            , speedX = memory2.ball.speedX * -1
+            , speedY = memory2.ball.speedY
+            , length = memory2.ball.length
+            }
+        , box = memory2.box
         }
-    , box = memory2.box
-    }
+
+    else if memory2.ball.y >= halfHeight && memory2.ball.speedY > 0 then
+        { ball =
+            { x = memory2.ball.x + memory2.ball.speedX
+            , y = memory2.ball.y + memory2.ball.speedY
+            , speedX = memory2.ball.speedX
+            , speedY = memory2.ball.speedY * -1
+            , length = memory2.ball.length
+            }
+        , box = memory2.box
+        }
+
+    else if memory2.ball.x <= -halfWidth && memory2.ball.speedX < 0 then
+        { ball =
+            { x = memory2.ball.x + memory2.ball.speedX
+            , y = memory2.ball.y + memory2.ball.speedY
+            , speedX = memory2.ball.speedX * -1
+            , speedY = memory2.ball.speedY
+            , length = memory2.ball.length
+            }
+        , box = memory2.box
+        }
+
+    else if memory2.ball.y <= -halfHeight && memory2.ball.speedY < 0 then
+        { ball =
+            { x = memory2.ball.x + memory2.ball.speedX
+            , y = memory2.ball.y + memory2.ball.speedY
+            , speedX = memory2.ball.speedX
+            , speedY = memory2.ball.speedY * -1
+            , length = memory2.ball.length
+            }
+        , box = memory2.box
+        }
+
+    else
+        { ball =
+            { x = memory2.ball.x + memory2.ball.speedX
+            , y = memory2.ball.y + memory2.ball.speedY
+            , speedX = memory2.ball.speedX
+            , speedY = memory2.ball.speedY
+            , length = memory2.ball.length
+            }
+        , box = memory2.box
+        }
