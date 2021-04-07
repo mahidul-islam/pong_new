@@ -3,9 +3,31 @@ module Main exposing (main, update, view)
 import Playground exposing (..)
 
 
+constWidth : Float
+constWidth =
+    960
+
+
+constHeight : Float
+constHeight =
+    600
+
+
 type alias Memory =
     { ball : Ball
     , box : Box
+    }
+
+
+type alias Player =
+    { score : Int, paddle : Paddle }
+
+
+type alias Paddle =
+    { x : Float
+    , y : Float
+    , length : Float
+    , thick : Float
     }
 
 
@@ -24,26 +46,29 @@ type alias Ball =
     }
 
 
-box : Box
-box =
-    { width = 960, height = 600 }
+initialBox : Box
+initialBox =
+    { width = constWidth, height = constHeight }
 
 
-ball : Ball
-ball =
+initialBall : Ball
+initialBall =
     { x = 0, y = 0, speedX = 5, speedY = 5, length = 20 }
 
 
-memory : Memory
-memory =
-    { ball = ball
-    , box = box
+initialMemory : Memory
+initialMemory =
+    { ball = initialBall
+    , box = initialBox
     }
 
 
-main : Program () (Game Memory) Msg
+
+-- main : Program () (Game Memory) Msg
+
+
 main =
-    game view update memory
+    game view update initialMemory
 
 
 view : Computer -> Memory -> List Shape
@@ -60,27 +85,27 @@ drawBall ball4 =
 
 
 drawBox : Box -> Shape
-drawBox box2 =
-    [ rectangle red 1 box2.height
+drawBox box =
+    [ rectangle red 1 box.height
         |> move
-            (box2.width
+            (box.width
                 / 2
             )
             0
-    , rectangle red 1 box2.height
+    , rectangle red 1 box.height
         |> move
-            -(box2.width
+            -(box.width
                 / 2
              )
             0
-    , rectangle red box2.width 1
+    , rectangle red box.width 1
         |> move 0
-            (box2.height
+            (box.height
                 / 2
             )
-    , rectangle red box2.width 1
+    , rectangle red box.width 1
         |> move 0
-            -(box2.height
+            -(box.height
                 / 2
              )
     ]
@@ -88,41 +113,81 @@ drawBox box2 =
 
 
 update : Computer -> Memory -> Memory
-update computer memory2 =
+update computer memory =
     let
         halfWidth =
-            memory2.box.width / 2
+            memory.box.width / 2
 
         halfHeight =
-            memory2.box.height / 2
+            memory.box.height / 2
 
         bsX =
-            memory2.ball.speedX
+            memory.ball.speedX
 
         bsY =
-            memory2.ball.speedY
+            memory.ball.speedY
 
         bx =
-            memory2.ball.x
+            memory.ball.x
 
         by =
-            memory2.ball.y
+            memory.ball.y
     in
     -- , x = bx + (toX computer.keyboard * memory2.ball.speed)
     -- , y = by + (toY computer.keyboard * memory2.ball.speed)
+    -- { memory2 | ball = { ball | x = bx, y = by } }
+    --     |>
     if bx >= halfWidth && bsX > 0 then
-        { memory2 | ball = { ball | speedX = bsX * -1, speedY = bsY, x = bx, y = by } }
+        { memory
+            | ball =
+                { initialBall
+                    | speedX = bsX * -1
+                    , speedY = bsY
+                    , x = bx + bsX
+                    , y = by + bsY
+                }
+        }
 
     else if by >= halfHeight && bsY > 0 then
-        { memory2 | ball = { ball | speedX = bsX, speedY = bsY * -1, x = bx, y = by } }
+        { memory
+            | ball =
+                { initialBall
+                    | speedX = bsX
+                    , speedY = bsY * -1
+                    , x = bx + bsX
+                    , y = by + bsY
+                }
+        }
 
     else if bx <= -halfWidth && bsX < 0 then
-        { memory2 | ball = { ball | speedX = bsX * -1, speedY = bsY, x = bx, y = by } }
+        { memory
+            | ball =
+                { initialBall
+                    | speedX = bsX * -1
+                    , speedY = bsY
+                    , x = bx + bsX
+                    , y = by + bsY
+                }
+        }
 
     else if by <= -halfHeight && bsY < 0 then
-        { memory2 | ball = { ball | speedX = bsX, speedY = bsY * -1, x = bx, y = by } }
+        { memory
+            | ball =
+                { initialBall
+                    | speedX = bsX
+                    , speedY = bsY * -1
+                    , x = bx + bsX
+                    , y = by + bsY
+                }
+        }
 
     else
-        { memory2
-            | ball = { ball | x = bx + bsX, y = by + bsY, speedX = bsX, speedY = bsY }
+        { memory
+            | ball =
+                { initialBall
+                    | x = bx + bsX
+                    , y = by + bsY
+                    , speedX = bsX
+                    , speedY = bsY
+                }
         }
