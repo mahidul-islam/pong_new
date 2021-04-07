@@ -95,61 +95,34 @@ update computer memory2 =
 
         halfHeight =
             memory2.box.height / 2
+
+        bsX =
+            memory2.ball.speedX
+
+        bsY =
+            memory2.ball.speedY
+
+        bx =
+            memory2.ball.x
+
+        by =
+            memory2.ball.y
     in
-    if memory2.ball.x >= halfWidth && memory2.ball.speedX > 0 then
-        { ball =
-            { x = memory2.ball.x + memory2.ball.speedX
-            , y = memory2.ball.y + memory2.ball.speedY
+    -- , x = bx + (toX computer.keyboard * memory2.ball.speed)
+    -- , y = by + (toY computer.keyboard * memory2.ball.speed)
+    if bx >= halfWidth && bsX > 0 then
+        { memory2 | ball = { ball | speedX = bsX * -1, speedY = bsY, x = bx, y = by } }
 
-            -- , x = memory2.ball.x + (toX computer.keyboard * memory2.ball.speed)
-            -- , y = memory2.ball.y + (toY computer.keyboard * memory2.ball.speed)
-            , speedX = memory2.ball.speedX * -1
-            , speedY = memory2.ball.speedY
-            , length = memory2.ball.length
-            }
-        , box = memory2.box
-        }
+    else if by >= halfHeight && bsY > 0 then
+        { memory2 | ball = { ball | speedX = bsX, speedY = bsY * -1, x = bx, y = by } }
 
-    else if memory2.ball.y >= halfHeight && memory2.ball.speedY > 0 then
-        { ball =
-            { x = memory2.ball.x + memory2.ball.speedX
-            , y = memory2.ball.y + memory2.ball.speedY
-            , speedX = memory2.ball.speedX
-            , speedY = memory2.ball.speedY * -1
-            , length = memory2.ball.length
-            }
-        , box = memory2.box
-        }
+    else if bx <= -halfWidth && bsX < 0 then
+        { memory2 | ball = { ball | speedX = bsX * -1, speedY = bsY, x = bx, y = by } }
 
-    else if memory2.ball.x <= -halfWidth && memory2.ball.speedX < 0 then
-        { ball =
-            { x = memory2.ball.x + memory2.ball.speedX
-            , y = memory2.ball.y + memory2.ball.speedY
-            , speedX = memory2.ball.speedX * -1
-            , speedY = memory2.ball.speedY
-            , length = memory2.ball.length
-            }
-        , box = memory2.box
-        }
-
-    else if memory2.ball.y <= -halfHeight && memory2.ball.speedY < 0 then
-        { ball =
-            { x = memory2.ball.x + memory2.ball.speedX
-            , y = memory2.ball.y + memory2.ball.speedY
-            , speedX = memory2.ball.speedX
-            , speedY = memory2.ball.speedY * -1
-            , length = memory2.ball.length
-            }
-        , box = memory2.box
-        }
+    else if by <= -halfHeight && bsY < 0 then
+        { memory2 | ball = { ball | speedX = bsX, speedY = bsY * -1, x = bx, y = by } }
 
     else
-        { ball =
-            { x = memory2.ball.x + memory2.ball.speedX
-            , y = memory2.ball.y + memory2.ball.speedY
-            , speedX = memory2.ball.speedX
-            , speedY = memory2.ball.speedY
-            , length = memory2.ball.length
-            }
-        , box = memory2.box
+        { memory2
+            | ball = { ball | x = bx + bsX, y = by + bsY, speedX = bsX, speedY = bsY }
         }
