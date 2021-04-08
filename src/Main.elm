@@ -92,6 +92,8 @@ view : Computer -> Memory -> List Shape
 view computer memory1 =
     [ drawBall memory1.ball
     , drawBox memory1.box
+
+    -- , words black <| String.fromInt memory1.playerLeft.playerInfo.score
     ]
 
 
@@ -144,13 +146,46 @@ updateScore player box ball =
     let
         _ =
             if (box.width / 2) < ball.x then
-                Debug.log "Left Player Score + 1" ((box.width / 2) < ball.x)
+                case player of
+                    PlayerRight playerInfo ->
+                        Debug.log "Right Player Score +1" playerInfo.score
+
+                    PlayerLeft playerInfo ->
+                        Debug.log "Nothing" playerInfo.score
+
+            else if -(box.width / 2) > ball.x then
+                case player of
+                    PlayerRight playerInfo ->
+                        Debug.log "Nothing" playerInfo.score
+
+                    PlayerLeft playerInfo ->
+                        Debug.log "Left Player Score +1" playerInfo.score
 
             else
-                Debug.log "Nothing" ((box.width / 2) < ball.x)
+                Debug.log "Nothing" 0
     in
-    -- { player | score = player.score + 1 }
-    player
+    if (box.width / 2) < ball.x then
+        case player of
+            PlayerRight playerInfo ->
+                { playerInfo | score = playerInfo.score + 1 }
+                    |> PlayerRight
+
+            PlayerLeft playerInfo ->
+                playerInfo
+                    |> PlayerLeft
+
+    else if -(box.width / 2) > ball.x then
+        case player of
+            PlayerRight playerInfo ->
+                playerInfo
+                    |> PlayerRight
+
+            PlayerLeft playerInfo ->
+                { playerInfo | score = playerInfo.score + 1 }
+                    |> PlayerLeft
+
+    else
+        player
 
 
 moveBall : Box -> Ball -> Ball
