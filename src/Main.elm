@@ -16,11 +16,21 @@ constHeight =
 type alias Memory =
     { ball : Ball
     , box : Box
+    , playerRight : Player
+    , playerLeft : Player
     }
 
 
-type alias Player =
-    { score : Int, paddle : Paddle }
+type Player
+    = PlayerRight PlayerInfo
+    | PlayerLeft PlayerInfo
+
+
+type alias PlayerInfo =
+    { score : Int
+
+    -- , paddle : Paddle
+    }
 
 
 type alias Paddle =
@@ -56,10 +66,17 @@ initialBall =
     { x = 0, y = 0, speedX = 5, speedY = 5, length = 20 }
 
 
+initPlayer : PlayerInfo
+initPlayer =
+    { score = 0 }
+
+
 initialMemory : Memory
 initialMemory =
     { ball = initialBall
     , box = initialBox
+    , playerRight = PlayerRight <| initPlayer
+    , playerLeft = PlayerLeft <| initPlayer
     }
 
 
@@ -114,7 +131,26 @@ drawBox box =
 
 update : Computer -> Memory -> Memory
 update computer memory =
-    { memory | ball = moveBall memory.box memory.ball }
+    { memory
+        | ball = moveBall memory.box memory.ball
+        , playerLeft = updateScore memory.playerLeft memory.box memory.ball
+
+        -- , playerRight = updateScore memory.playerRight memory.box memory.ball
+    }
+
+
+updateScore : Player -> Box -> Ball -> Player
+updateScore player box ball =
+    let
+        _ =
+            if (box.width / 2) < ball.x then
+                Debug.log "Left Player Score + 1" ((box.width / 2) < ball.x)
+
+            else
+                Debug.log "Nothing" ((box.width / 2) < ball.x)
+    in
+    -- { player | score = player.score + 1 }
+    player
 
 
 moveBall : Box -> Ball -> Ball
@@ -142,7 +178,7 @@ moveBall box ball =
     -- , y = by + (toY computer.keyboard * memory2.ball.speed)
     -- { memory2 | ball = { ball | x = bx, y = by } }
     --     |>
-    if bx >= halfWidth && bsX > 0 then
+    if bx > halfWidth && bsX > 0 then
         { ball
             | speedX = bsX * -1
             , speedY = bsY
@@ -150,7 +186,7 @@ moveBall box ball =
             , y = by + bsY
         }
 
-    else if by >= halfHeight && bsY > 0 then
+    else if by > halfHeight && bsY > 0 then
         { ball
             | speedX = bsX
             , speedY = bsY * -1
@@ -158,7 +194,7 @@ moveBall box ball =
             , y = by + bsY
         }
 
-    else if bx <= -halfWidth && bsX < 0 then
+    else if bx < -halfWidth && bsX < 0 then
         { ball
             | speedX = bsX * -1
             , speedY = bsY
@@ -166,7 +202,7 @@ moveBall box ball =
             , y = by + bsY
         }
 
-    else if by <= -halfHeight && bsY < 0 then
+    else if by < -halfHeight && bsY < 0 then
         { ball
             | speedX = bsX
             , speedY = bsY * -1
