@@ -114,80 +114,70 @@ drawBox box =
 
 update : Computer -> Memory -> Memory
 update computer memory =
+    { memory | ball = moveBall memory.box memory.ball }
+
+
+moveBall : Box -> Ball -> Ball
+moveBall box ball =
     let
         halfWidth =
-            memory.box.width / 2
+            box.width / 2
 
         halfHeight =
-            memory.box.height / 2
+            box.height / 2
 
         bsX =
-            memory.ball.speedX
+            ball.speedX
 
         bsY =
-            memory.ball.speedY
+            ball.speedY
 
         bx =
-            memory.ball.x
+            ball.x
 
         by =
-            memory.ball.y
+            ball.y
     in
     -- , x = bx + (toX computer.keyboard * memory2.ball.speed)
     -- , y = by + (toY computer.keyboard * memory2.ball.speed)
     -- { memory2 | ball = { ball | x = bx, y = by } }
     --     |>
     if bx >= halfWidth && bsX > 0 then
-        { memory
-            | ball =
-                { initialBall
-                    | speedX = bsX * -1
-                    , speedY = bsY
-                    , x = bx + bsX
-                    , y = by + bsY
-                }
+        { ball
+            | speedX = bsX * -1
+            , speedY = bsY
+            , x = bx + bsX
+            , y = by + bsY
         }
 
     else if by >= halfHeight && bsY > 0 then
-        { memory
-            | ball =
-                { initialBall
-                    | speedX = bsX
-                    , speedY = bsY * -1
-                    , x = bx + bsX
-                    , y = by + bsY
-                }
+        { ball
+            | speedX = bsX
+            , speedY = bsY * -1
+            , x = bx + bsX
+            , y = by + bsY
         }
 
     else if bx <= -halfWidth && bsX < 0 then
-        { memory
-            | ball =
-                { initialBall
-                    | speedX = bsX * -1
-                    , speedY = bsY
-                    , x = bx + bsX
-                    , y = by + bsY
-                }
+        { ball
+            | speedX = bsX * -1
+            , speedY = bsY
+            , x = bx + bsX
+            , y = by + bsY
         }
 
     else if by <= -halfHeight && bsY < 0 then
-        { memory
-            | ball =
-                { initialBall
-                    | speedX = bsX
-                    , speedY = bsY * -1
-                    , x = bx + bsX
-                    , y = by + bsY
-                }
+        { ball
+            | speedX = bsX
+            , speedY = bsY * -1
+            , x = bx + bsX
+            , y = by + bsY
         }
 
     else
-        { memory
-            | ball =
-                { initialBall
-                    | x = bx + bsX
-                    , y = by + bsY
-                    , speedX = bsX
-                    , speedY = bsY
-                }
+        { ball
+            | x = bx + bsX
+            , y = by + bsY
+            , speedX = bsX
+            , speedY = bsY
         }
