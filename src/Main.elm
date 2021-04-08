@@ -92,9 +92,19 @@ view : Computer -> Memory -> List Shape
 view computer memory1 =
     [ drawBall memory1.ball
     , drawBox memory1.box
-
-    -- , words black <| String.fromInt memory1.playerLeft.playerInfo.score
+    , drawScore memory1.playerLeft
+    , drawScore memory1.playerRight
     ]
+
+
+drawScore : Player -> Shape
+drawScore player =
+    case player of
+        PlayerRight playerInfo ->
+            (words black <| "Score Right : " ++ String.fromInt playerInfo.score) |> move 0 160
+
+        PlayerLeft playerInfo ->
+            (words black <| "Score Left : " ++ String.fromInt playerInfo.score) |> move 0 200
 
 
 drawBall : Ball -> Shape
@@ -136,8 +146,7 @@ update computer memory =
     { memory
         | ball = moveBall memory.box memory.ball
         , playerLeft = updateScore memory.playerLeft memory.box memory.ball
-
-        -- , playerRight = updateScore memory.playerRight memory.box memory.ball
+        , playerRight = updateScore memory.playerRight memory.box memory.ball
     }
 
 
