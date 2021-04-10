@@ -208,45 +208,108 @@ moveBall box ball playerLeft playerRight =
         by =
             ball.y
     in
-    if bx > halfWidth && bsX > 0 then
-        { ball
-            | speedX = bsX * -1
-            , speedY = bsY
-            , x = bx + bsX
-            , y = by + bsY
-        }
+    case playerLeft of
+        PlayerLeft playerInfo ->
+            case playerRight of
+                PlayerRight playerInfo2 ->
+                    -- Only possible if missed by paddle
+                    if bx > halfWidth && bsX > 0 then
+                        { ball
+                            | speedX = bsX * -1
+                            , speedY = bsY
+                            , x = bx + bsX
+                            , y = by + bsY
+                        }
 
-    else if by > halfHeight && bsY > 0 then
-        { ball
-            | speedX = bsX
-            , speedY = bsY * -1
-            , x = bx + bsX
-            , y = by + bsY
-        }
+                    else if by > halfHeight && bsY > 0 then
+                        { ball
+                            | speedX = bsX
+                            , speedY = bsY * -1
+                            , x = bx + bsX
+                            , y = by + bsY
+                        }
 
-    else if bx < -halfWidth && bsX < 0 then
-        { ball
-            | speedX = bsX * -1
-            , speedY = bsY
-            , x = bx + bsX
-            , y = by + bsY
-        }
+                    else if bx < -halfWidth && bsX < 0 then
+                        { ball
+                            | speedX = bsX * -1
+                            , speedY = bsY
+                            , x = bx + bsX
+                            , y = by + bsY
+                        }
 
-    else if by < -halfHeight && bsY < 0 then
-        { ball
-            | speedX = bsX
-            , speedY = bsY * -1
-            , x = bx + bsX
-            , y = by + bsY
-        }
+                    else if by < -halfHeight && bsY < 0 then
+                        { ball
+                            | speedX = bsX
+                            , speedY = bsY * -1
+                            , x = bx + bsX
+                            , y = by + bsY
+                        }
 
-    else
-        { ball
-            | x = bx + bsX
-            , y = by + bsY
-            , speedX = bsX
-            , speedY = bsY
-        }
+                    else
+                        { ball
+                            | x = bx + bsX
+                            , y = by + bsY
+                            , speedX = bsX
+                            , speedY = bsY
+                        }
+
+                -- Not Possible
+                PlayerLeft playerInfo2 ->
+                    { ball
+                        | x = bx + bsX
+                        , y = by + bsY
+                        , speedX = bsX
+                        , speedY = bsY
+                    }
+
+        -- Not Possible
+        PlayerRight playerInfo ->
+            { ball
+                | x = bx + bsX
+                , y = by + bsY
+                , speedX = bsX
+                , speedY = bsY
+            }
+
+
+
+-- playerLeft of
+--     PlayerRight  playerInfo ->
+--         if bx > halfWidth && bsX > 0 then
+--             { ball
+--                 | speedX = bsX * -1
+--                 , speedY = bsY
+--                 , x = bx + bsX
+--                 , y = by + bsY
+--             }
+--         else if by > halfHeight && bsY > 0 then
+--             { ball
+--                 | speedX = bsX
+--                 , speedY = bsY * -1
+--                 , x = bx + bsX
+--                 , y = by + bsY
+--             }
+--         else if bx < -halfWidth && bsX < 0 then
+--             { ball
+--                 | speedX = bsX * -1
+--                 , speedY = bsY
+--                 , x = bx + bsX
+--                 , y = by + bsY
+--             }
+--         else if by < -halfHeight && bsY < 0 then
+--             { ball
+--                 | speedX = bsX
+--                 , speedY = bsY * -1
+--                 , x = bx + bsX
+--                 , y = by + bsY
+--             }
+--         else
+--             { ball
+--                 | x = bx + bsX
+--                 , y = by + bsY
+--                 , speedX = bsX
+--                 , speedY = bsY
+--             }
 
 
 updatePlayer : Player -> Box -> Ball -> Computer -> Player
@@ -294,18 +357,39 @@ updatePlayer player box ball computer =
 
     else
         case player of
-            PlayerRight playerInfo ->
-                -- if playerInfo.paddle.y <= 300 && playerInfo.paddle.y >= -300 then
-                { playerInfo
-                    | paddle =
-                        { initRightPaddle
-                            | y = playerInfo.paddle.y + (toY computer.keyboard * 10)
-                        }
-                }
-                    |> PlayerRight
-
+            -- PlayerRight playerInfo ->
+            --     -- if playerInfo.paddle.y <= 300 && playerInfo.paddle.y >= -300 then
+            --     { playerInfo
+            --         | paddle =
+            --             { initRightPaddle
+            --                 | y = playerInfo.paddle.y + (toY computer.keyboard * 10)
+            --             }
+            --     }
+            --         |> PlayerRight
             -- else
             --     playerInfo |> PlayerRight
+            PlayerRight playerInfo ->
+                if Set.member "ArrowUp" computer.keyboard.keys && playerInfo.paddle.y < 300 then
+                    { playerInfo
+                        | paddle =
+                            { initRightPaddle
+                                | y = playerInfo.paddle.y + 10
+                            }
+                    }
+                        |> PlayerRight
+
+                else if Set.member "ArrowDown" computer.keyboard.keys && playerInfo.paddle.y > -300 then
+                    { playerInfo
+                        | paddle =
+                            { initRightPaddle
+                                | y = playerInfo.paddle.y - 10
+                            }
+                    }
+                        |> PlayerRight
+
+                else
+                    playerInfo |> PlayerRight
+
             PlayerLeft playerInfo ->
                 if Set.member "w" computer.keyboard.keys && playerInfo.paddle.y < 300 then
                     { playerInfo
