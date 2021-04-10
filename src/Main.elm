@@ -1,6 +1,7 @@
 module Main exposing (main, update, view)
 
 import Playground exposing (..)
+import Set
 
 
 constWidth : Float
@@ -80,7 +81,7 @@ initRightPaddle =
     { x = 450
     , y = 0
     , thick = 10
-    , length = 50
+    , length = 70
     }
 
 
@@ -89,7 +90,7 @@ initLeftPaddle =
     { x = -450
     , y = 0
     , thick = 10
-    , length = 50
+    , length = 70
     }
 
 
@@ -181,13 +182,13 @@ update : Computer -> Memory -> Memory
 update computer memory =
     { memory
         | ball = moveBall memory.box memory.ball
-        , playerLeft = updateScore memory.playerLeft memory.box memory.ball
-        , playerRight = updateScore memory.playerRight memory.box memory.ball
+        , playerLeft = updatePlayer memory.playerLeft memory.box memory.ball computer
+        , playerRight = updatePlayer memory.playerRight memory.box memory.ball computer
     }
 
 
-updateScore : Player -> Box -> Ball -> Player
-updateScore player box ball =
+updatePlayer : Player -> Box -> Ball -> Computer -> Player
+updatePlayer player box ball computer =
     -- let
     --     _ =
     --         if (box.width / 2) < ball.x then
@@ -205,6 +206,10 @@ updateScore player box ball =
     --         else
     --             Debug.log "Nothing" 0
     -- in
+    let
+        _ =
+            Debug.log "Key pressed" computer.keyboard.keys
+    in
     if (box.width / 2) < ball.x then
         case player of
             PlayerRight playerInfo ->
@@ -226,7 +231,40 @@ updateScore player box ball =
                     |> PlayerLeft
 
     else
-        player
+        case player of
+            PlayerRight playerInfo ->
+                -- if playerInfo.paddle.y <= 300 && playerInfo.paddle.y >= -300 then
+                { playerInfo
+                    | paddle =
+                        { initRightPaddle
+                            | y = playerInfo.paddle.y + (toY computer.keyboard * 10)
+                        }
+                }
+                    |> PlayerRight
+
+            -- else
+            --     playerInfo |> PlayerRight
+            PlayerLeft playerInfo ->
+                if computer.keyboard.keys == Set.fromList [ "w" ] && playerInfo.paddle.y < 300 then
+                    { playerInfo
+                        | paddle =
+                            { initLeftPaddle
+                                | y = playerInfo.paddle.y + 10
+                            }
+                    }
+                        |> PlayerLeft
+
+                else if computer.keyboard.keys == Set.fromList [ "s" ] && playerInfo.paddle.y > -300 then
+                    { playerInfo
+                        | paddle =
+                            { initLeftPaddle
+                                | y = playerInfo.paddle.y - 10
+                            }
+                    }
+                        |> PlayerLeft
+
+                else
+                    playerInfo |> PlayerLeft
 
 
 
