@@ -28,8 +28,7 @@ type Player
 
 type alias PlayerInfo =
     { score : Int
-
-    -- , paddle : Paddle
+    , paddle : Paddle
     }
 
 
@@ -66,17 +65,40 @@ initialBall =
     { x = 0, y = 0, speedX = 5, speedY = 5, length = 20 }
 
 
-initPlayer : PlayerInfo
-initPlayer =
-    { score = 0 }
+initLeftPlayer : PlayerInfo
+initLeftPlayer =
+    { score = 0, paddle = initLeftPaddle }
+
+
+initRightPlayer : PlayerInfo
+initRightPlayer =
+    { score = 0, paddle = initRightPaddle }
+
+
+initRightPaddle : Paddle
+initRightPaddle =
+    { x = 450
+    , y = 0
+    , thick = 10
+    , length = 50
+    }
+
+
+initLeftPaddle : Paddle
+initLeftPaddle =
+    { x = -450
+    , y = 0
+    , thick = 10
+    , length = 50
+    }
 
 
 initialMemory : Memory
 initialMemory =
     { ball = initialBall
     , box = initialBox
-    , playerRight = PlayerRight <| initPlayer
-    , playerLeft = PlayerLeft <| initPlayer
+    , playerRight = PlayerRight <| initRightPlayer
+    , playerLeft = PlayerLeft <| initLeftPlayer
     }
 
 
@@ -94,7 +116,21 @@ view computer memory1 =
     , drawBox memory1.box
     , drawScore memory1.playerLeft
     , drawScore memory1.playerRight
+    , drawPaddle memory1.playerLeft
+    , drawPaddle memory1.playerRight
     ]
+
+
+drawPaddle : Player -> Shape
+drawPaddle player =
+    case player of
+        PlayerRight playerInfo ->
+            rectangle green playerInfo.paddle.thick playerInfo.paddle.length
+                |> move playerInfo.paddle.x playerInfo.paddle.y
+
+        PlayerLeft playerInfo ->
+            rectangle green playerInfo.paddle.thick playerInfo.paddle.length
+                |> move playerInfo.paddle.x playerInfo.paddle.y
 
 
 drawScore : Player -> Shape
@@ -152,27 +188,23 @@ update computer memory =
 
 updateScore : Player -> Box -> Ball -> Player
 updateScore player box ball =
-    let
-        _ =
-            if (box.width / 2) < ball.x then
-                case player of
-                    PlayerRight playerInfo ->
-                        Debug.log "Right Player Score +1" playerInfo.score
-
-                    PlayerLeft playerInfo ->
-                        Debug.log "Nothing" playerInfo.score
-
-            else if -(box.width / 2) > ball.x then
-                case player of
-                    PlayerRight playerInfo ->
-                        Debug.log "Nothing" playerInfo.score
-
-                    PlayerLeft playerInfo ->
-                        Debug.log "Left Player Score +1" playerInfo.score
-
-            else
-                Debug.log "Nothing" 0
-    in
+    -- let
+    --     _ =
+    --         if (box.width / 2) < ball.x then
+    --             case player of
+    --                 PlayerRight playerInfo ->
+    --                     Debug.log "Right Player Score +1" playerInfo.score
+    --                 PlayerLeft playerInfo ->
+    --                     Debug.log "Nothing" playerInfo.score
+    --         else if -(box.width / 2) > ball.x then
+    --             case player of
+    --                 PlayerRight playerInfo ->
+    --                     Debug.log "Nothing" playerInfo.score
+    --                 PlayerLeft playerInfo ->
+    --                     Debug.log "Left Player Score +1" playerInfo.score
+    --         else
+    --             Debug.log "Nothing" 0
+    -- in
     if (box.width / 2) < ball.x then
         case player of
             PlayerRight playerInfo ->
@@ -195,6 +227,18 @@ updateScore player box ball =
 
     else
         player
+
+
+
+-- updateScoreValue : Player -> Player
+-- updateScoreValue player =
+--     case player of
+--         PlayerRight playerInfo ->
+--             { playerInfo | score = playerInfo.score + 1 }
+--                 |> PlayerRight
+--         PlayerLeft playerInfo ->
+--             { playerInfo | score = playerInfo.score + 1 }
+--                 |> PlayerLeft
 
 
 moveBall : Box -> Ball -> Ball
