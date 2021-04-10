@@ -207,69 +207,84 @@ moveBall box ball playerLeft playerRight =
 
         by =
             ball.y
+
+        clashDistanceX =
+            (initLeftPaddle.thick + initialBall.length) / 2
+
+        clashDistanceY =
+            (initLeftPaddle.length + initialBall.length) / 2
     in
     case playerLeft of
-        PlayerLeft playerInfo ->
+        PlayerLeft leftInfo ->
             case playerRight of
-                PlayerRight playerInfo2 ->
+                PlayerRight rightInfo ->
                     -- Only possible if missed by paddle
                     if bx > halfWidth && bsX > 0 then
-                        { ball
-                            | speedX = bsX * -1
-                            , speedY = bsY
-                            , x = bx + bsX
-                            , y = by + bsY
-                        }
+                        reverseXBallUpdate ball
 
                     else if by > halfHeight && bsY > 0 then
-                        { ball
-                            | speedX = bsX
-                            , speedY = bsY * -1
-                            , x = bx + bsX
-                            , y = by + bsY
-                        }
+                        reverseYBallUpdate ball
 
                     else if bx < -halfWidth && bsX < 0 then
-                        { ball
-                            | speedX = bsX * -1
-                            , speedY = bsY
-                            , x = bx + bsX
-                            , y = by + bsY
-                        }
+                        reverseXBallUpdate ball
 
                     else if by < -halfHeight && bsY < 0 then
-                        { ball
-                            | speedX = bsX
-                            , speedY = bsY * -1
-                            , x = bx + bsX
-                            , y = by + bsY
-                        }
+                        reverseYBallUpdate ball
+                        -- Have to check if the Paddle crash with the ball below
+
+                    else if (diff bx leftInfo.paddle.x < clashDistanceX) || (diff bx rightInfo.paddle.x < clashDistanceX) then
+                        if (diff bx leftInfo.paddle.x < clashDistanceX) && (diff leftInfo.paddle.y ball.y < clashDistanceY) then
+                            reverseXBallUpdate ball
+
+                        else if (diff bx rightInfo.paddle.x < clashDistanceX) && (diff rightInfo.paddle.y ball.y < clashDistanceY) then
+                            reverseXBallUpdate ball
+
+                        else
+                            defaultBallUpdate ball
 
                     else
-                        { ball
-                            | x = bx + bsX
-                            , y = by + bsY
-                            , speedX = bsX
-                            , speedY = bsY
-                        }
+                        defaultBallUpdate ball
 
                 -- Not Possible
                 PlayerLeft _ ->
-                    { ball
-                        | x = bx + bsX
-                        , y = by + bsY
-                        , speedX = bsX
-                        , speedY = bsY
-                    }
+                    defaultBallUpdate ball
 
         -- Not Possible
         PlayerRight _ ->
-            { ball
-                | x = bx + bsX
-                , y = by + bsY
-                , speedX = bsX
-                , speedY = bsY
-            }
+            defaultBallUpdate ball
+
+
+reverseXBallUpdate : Ball -> Ball
+reverseXBallUpdate ball =
+    { ball
+        | speedX = ball.speedX * -1
+    }
+        |> defaultBallUpdate
+
+
+reverseYBallUpdate : Ball -> Ball
+reverseYBallUpdate ball =
+    { ball
+        | speedY = ball.speedY * -1
+    }
+        |> defaultBallUpdate
+
+
+defaultBallUpdate : Ball -> Ball
+defaultBallUpdate ball =
+    { ball
+        | x = ball.x + ball.speedX
+        , y = ball.y + ball.speedY
+    }
+
+
+diff : Number -> Number -> Number
+diff first second =
+    if first >= second then
+        first - second
+
+    else
+        second - first
 
 
 updatePlayer : Player -> Box -> Ball -> Computer -> Player
