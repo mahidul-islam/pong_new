@@ -278,7 +278,7 @@ defaultBallUpdate ball =
     }
 
 
-diff : Number -> Number -> Number
+diff : Float -> Float -> Float
 diff first second =
     if first >= second then
         first - second
@@ -289,10 +289,10 @@ diff first second =
 
 updatePlayer : Player -> Box -> Ball -> Computer -> Player
 updatePlayer player box ball computer =
-    let
-        _ =
-            Debug.log "Key pressed" computer.keyboard.keys
-    in
+    -- let
+    --     _ =
+    --         Debug.log "Key pressed" computer.keyboard.keys
+    -- in
     if (box.width / 2) < ball.x then
         case player of
             PlayerRight playerInfo ->
