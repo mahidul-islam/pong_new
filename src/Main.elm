@@ -245,7 +245,7 @@ updatePlayer player box ball computer =
             -- else
             --     playerInfo |> PlayerRight
             PlayerLeft playerInfo ->
-                if computer.keyboard.keys == Set.fromList [ "w" ] && playerInfo.paddle.y < 300 then
+                if Set.member "w" computer.keyboard.keys && playerInfo.paddle.y < 300 then
                     { playerInfo
                         | paddle =
                             { initLeftPaddle
@@ -254,7 +254,7 @@ updatePlayer player box ball computer =
                     }
                         |> PlayerLeft
 
-                else if computer.keyboard.keys == Set.fromList [ "s" ] && playerInfo.paddle.y > -300 then
+                else if Set.member "s" computer.keyboard.keys && playerInfo.paddle.y > -300 then
                     { playerInfo
                         | paddle =
                             { initLeftPaddle
