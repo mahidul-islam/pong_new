@@ -254,7 +254,7 @@ moveBall box ball playerLeft playerRight =
                         }
 
                 -- Not Possible
-                PlayerLeft playerInfo2 ->
+                PlayerLeft _ ->
                     { ball
                         | x = bx + bsX
                         , y = by + bsY
@@ -263,7 +263,7 @@ moveBall box ball playerLeft playerRight =
                     }
 
         -- Not Possible
-        PlayerRight playerInfo ->
+        PlayerRight _ ->
             { ball
                 | x = bx + bsX
                 , y = by + bsY
@@ -272,65 +272,8 @@ moveBall box ball playerLeft playerRight =
             }
 
 
-
--- playerLeft of
---     PlayerRight  playerInfo ->
---         if bx > halfWidth && bsX > 0 then
---             { ball
---                 | speedX = bsX * -1
---                 , speedY = bsY
---                 , x = bx + bsX
---                 , y = by + bsY
---             }
---         else if by > halfHeight && bsY > 0 then
---             { ball
---                 | speedX = bsX
---                 , speedY = bsY * -1
---                 , x = bx + bsX
---                 , y = by + bsY
---             }
---         else if bx < -halfWidth && bsX < 0 then
---             { ball
---                 | speedX = bsX * -1
---                 , speedY = bsY
---                 , x = bx + bsX
---                 , y = by + bsY
---             }
---         else if by < -halfHeight && bsY < 0 then
---             { ball
---                 | speedX = bsX
---                 , speedY = bsY * -1
---                 , x = bx + bsX
---                 , y = by + bsY
---             }
---         else
---             { ball
---                 | x = bx + bsX
---                 , y = by + bsY
---                 , speedX = bsX
---                 , speedY = bsY
---             }
-
-
 updatePlayer : Player -> Box -> Ball -> Computer -> Player
 updatePlayer player box ball computer =
-    -- let
-    --     _ =
-    --         if (box.width / 2) < ball.x then
-    --             case player of
-    --                 PlayerRight playerInfo ->
-    --                     Debug.log "Right Player Score +1" playerInfo.score
-    --                 PlayerLeft playerInfo ->
-    --                     Debug.log "Nothing" playerInfo.score
-    --         else if -(box.width / 2) > ball.x then
-    --             case player of
-    --                 PlayerRight playerInfo ->
-    --                     Debug.log "Nothing" playerInfo.score
-    --                 PlayerLeft playerInfo ->
-    --                     Debug.log "Left Player Score +1" playerInfo.score
-    --         else
-    --             Debug.log "Nothing" 0
-    -- in
     let
         _ =
             Debug.log "Key pressed" computer.keyboard.keys
@@ -357,17 +300,6 @@ updatePlayer player box ball computer =
 
     else
         case player of
-            -- PlayerRight playerInfo ->
-            --     -- if playerInfo.paddle.y <= 300 && playerInfo.paddle.y >= -300 then
-            --     { playerInfo
-            --         | paddle =
-            --             { initRightPaddle
-            --                 | y = playerInfo.paddle.y + (toY computer.keyboard * 10)
-            --             }
-            --     }
-            --         |> PlayerRight
-            -- else
-            --     playerInfo |> PlayerRight
             PlayerRight playerInfo ->
                 if Set.member "ArrowUp" computer.keyboard.keys && playerInfo.paddle.y < 300 then
                     { playerInfo
@@ -411,15 +343,3 @@ updatePlayer player box ball computer =
 
                 else
                     playerInfo |> PlayerLeft
-
-
-
--- updateScoreValue : Player -> Player
--- updateScoreValue player =
---     case player of
---         PlayerRight playerInfo ->
---             { playerInfo | score = playerInfo.score + 1 }
---                 |> PlayerRight
---         PlayerLeft playerInfo ->
---             { playerInfo | score = playerInfo.score + 1 }
---                 |> PlayerLeft
