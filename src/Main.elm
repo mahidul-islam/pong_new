@@ -146,7 +146,7 @@ drawScore player =
 
 drawBall : Ball -> Shape
 drawBall ball4 =
-    rectangle blue ball4.length ball4.length
+    square blue ball4.length
         |> move ball4.x ball4.y
 
 
@@ -181,10 +181,72 @@ drawBox box =
 update : Computer -> Memory -> Memory
 update computer memory =
     { memory
-        | ball = moveBall memory.box memory.ball
+        | ball = moveBall memory.box memory.ball memory.playerLeft memory.playerRight
         , playerLeft = updatePlayer memory.playerLeft memory.box memory.ball computer
         , playerRight = updatePlayer memory.playerRight memory.box memory.ball computer
     }
+
+
+moveBall : Box -> Ball -> Player -> Player -> Ball
+moveBall box ball playerLeft playerRight =
+    let
+        halfWidth =
+            box.width / 2
+
+        halfHeight =
+            box.height / 2
+
+        bsX =
+            ball.speedX
+
+        bsY =
+            ball.speedY
+
+        bx =
+            ball.x
+
+        by =
+            ball.y
+    in
+    if bx > halfWidth && bsX > 0 then
+        { ball
+            | speedX = bsX * -1
+            , speedY = bsY
+            , x = bx + bsX
+            , y = by + bsY
+        }
+
+    else if by > halfHeight && bsY > 0 then
+        { ball
+            | speedX = bsX
+            , speedY = bsY * -1
+            , x = bx + bsX
+            , y = by + bsY
+        }
+
+    else if bx < -halfWidth && bsX < 0 then
+        { ball
+            | speedX = bsX * -1
+            , speedY = bsY
+            , x = bx + bsX
+            , y = by + bsY
+        }
+
+    else if by < -halfHeight && bsY < 0 then
+        { ball
+            | speedX = bsX
+            , speedY = bsY * -1
+            , x = bx + bsX
+            , y = by + bsY
+        }
+
+    else
+        { ball
+            | x = bx + bsX
+            , y = by + bsY
+            , speedX = bsX
+            , speedY = bsY
+        }
 
 
 updatePlayer : Player -> Box -> Ball -> Computer -> Player
@@ -277,69 +339,3 @@ updatePlayer player box ball computer =
 --         PlayerLeft playerInfo ->
 --             { playerInfo | score = playerInfo.score + 1 }
 --                 |> PlayerLeft
-
-
-moveBall : Box -> Ball -> Ball
-moveBall box ball =
-    let
-        halfWidth =
-            box.width / 2
-
-        halfHeight =
-            box.height / 2
-
-        bsX =
-            ball.speedX
-
-        bsY =
-            ball.speedY
-
-        bx =
-            ball.x
-
-        by =
-            ball.y
-    in
-    -- , x = bx + (toX computer.keyboard * memory2.ball.speed)
-    -- , y = by + (toY computer.keyboard * memory2.ball.speed)
-    -- { memory2 | ball = { ball | x = bx, y = by } }
-    --     |>
-    if bx > halfWidth && bsX > 0 then
-        { ball
-            | speedX = bsX * -1
-            , speedY = bsY
-            , x = bx + bsX
-            , y = by + bsY
-        }
-
-    else if by > halfHeight && bsY > 0 then
-        { ball
-            | speedX = bsX
-            , speedY = bsY * -1
-            , x = bx + bsX
-            , y = by + bsY
-        }
-
-    else if bx < -halfWidth && bsX < 0 then
-        { ball
-            | speedX = bsX * -1
-            , speedY = bsY
-            , x = bx + bsX
-            , y = by + bsY
-        }
-
-    else if by < -halfHeight && bsY < 0 then
-        { ball
-            | speedX = bsX
-            , speedY = bsY * -1
-            , x = bx + bsX
-            , y = by + bsY
-        }
-
-    else
-        { ball
-            | x = bx + bsX
-            , y = by + bsY
-            , speedX = bsX
-            , speedY = bsY
-        }
