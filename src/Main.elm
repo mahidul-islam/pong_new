@@ -48,7 +48,7 @@ ballLength =
 
 initialBall : Ball
 initialBall =
-    { x = 0, y = 0, speedX = 10, speedY = 10 }
+    { x = 0, y = 0, speedX = 7, speedY = 7 }
 
 
 initPlayer side =
