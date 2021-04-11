@@ -1,49 +1,35 @@
-module Main exposing (main, update, view)
+module Main exposing (main)
 
 import Playground exposing (..)
 import Set
 
 
-constWidth : Float
-constWidth =
+windowWidth : Float
+windowWidth =
     960
 
 
-constHeight : Float
-constHeight =
+windowHeight : Float
+windowHeight =
     600
 
 
 type alias Memory =
     { ball : Ball
-    , box : Box
     , playerRight : Player
     , playerLeft : Player
     }
 
 
-type Player
-    = PlayerRight PlayerInfo
-    | PlayerLeft PlayerInfo
+type PlayerSide
+    = RightSide
+    | LeftSide
 
 
-type alias PlayerInfo =
+type alias Player =
     { score : Int
-    , paddle : Paddle
-    }
-
-
-type alias Paddle =
-    { x : Float
-    , y : Float
-    , length : Float
-    , thick : Float
-    }
-
-
-type alias Box =
-    { width : Float
-    , height : Float
+    , paddleY : Float
+    , side : PlayerSide
     }
 
 
@@ -52,54 +38,36 @@ type alias Ball =
     , y : Float
     , speedX : Float
     , speedY : Float
-    , length : Float
     }
 
 
-initialBox : Box
-initialBox =
-    { width = constWidth, height = constHeight }
+ballLength : Float
+ballLength =
+    20
 
 
 initialBall : Ball
 initialBall =
-    { x = 0, y = 0, speedX = 5, speedY = 5, length = 20 }
+    { x = 0, y = 0, speedX = 10, speedY = 10 }
 
 
-initLeftPlayer : PlayerInfo
-initLeftPlayer =
-    { score = 0, paddle = initLeftPaddle }
+initPlayer side =
+    { side = side, score = 0, paddleY = 0 }
 
 
-initRightPlayer : PlayerInfo
-initRightPlayer =
-    { score = 0, paddle = initRightPaddle }
+paddleThick =
+    10
 
 
-initRightPaddle : Paddle
-initRightPaddle =
-    { x = 450
-    , y = 0
-    , thick = 10
-    , length = 70
-    }
-
-
-initLeftPaddle : Paddle
-initLeftPaddle =
-    { x = -450
-    , y = 0
-    , thick = 10
-    , length = 70
-    }
+paddleLength =
+    70
 
 
 initialMemory : Memory
 initialMemory =
     { ball = initialBall
-    , box = initialBox
-    , playerRight = PlayerRight <| initRightPlayer
-    , playerLeft = PlayerLeft <| initLeftPlayer
+    , playerRight = initPlayer RightSide
+    , playerLeft = initPlayer LeftSide
     }
 
 
@@ -112,166 +80,186 @@ main =
 
 
 view : Computer -> Memory -> List Shape
-view computer memory1 =
-    [ drawBall memory1.ball
-    , drawBox memory1.box
-    , drawScore memory1.playerLeft
-    , drawScore memory1.playerRight
-    , drawPaddle memory1.playerLeft
-    , drawPaddle memory1.playerRight
+view computer memory =
+    [ viewBall memory.ball
+    , viewBox
+    , viewScore memory.playerLeft
+    , viewScore memory.playerRight
+    , viewPaddle memory.playerLeft
+    , viewPaddle memory.playerRight
     ]
 
 
-drawPaddle : Player -> Shape
-drawPaddle player =
-    case player of
-        PlayerRight playerInfo ->
-            rectangle green playerInfo.paddle.thick playerInfo.paddle.length
-                |> move playerInfo.paddle.x playerInfo.paddle.y
+paddleX : PlayerSide -> Float
+paddleX side =
+    case side of
+        RightSide ->
+            450
 
-        PlayerLeft playerInfo ->
-            rectangle green playerInfo.paddle.thick playerInfo.paddle.length
-                |> move playerInfo.paddle.x playerInfo.paddle.y
+        LeftSide ->
+            -450
 
 
-drawScore : Player -> Shape
-drawScore player =
-    case player of
-        PlayerRight playerInfo ->
-            (words black <| "Score Right : " ++ String.fromInt playerInfo.score) |> move 0 160
-
-        PlayerLeft playerInfo ->
-            (words black <| "Score Left : " ++ String.fromInt playerInfo.score) |> move 0 200
+viewPaddle : { a | side : PlayerSide, paddleY : Float } -> Shape
+viewPaddle { side, paddleY } =
+    rectangle green paddleThick paddleLength
+        |> move (paddleX side) paddleY
 
 
-drawBall : Ball -> Shape
-drawBall ball4 =
-    square blue ball4.length
-        |> move ball4.x ball4.y
+viewScore : { player | score : Int, side : PlayerSide } -> Shape
+viewScore { side, score } =
+    let
+        scoreText sideText =
+            words black
+                ("Score "
+                    ++ sideText
+                    ++ " : "
+                    ++ String.fromInt score
+                )
+    in
+    case side of
+        RightSide ->
+            scoreText "Right" |> move 0 160
+
+        LeftSide ->
+            scoreText "Left" |> move 0 200
 
 
-drawBox : Box -> Shape
-drawBox box =
-    [ rectangle red 1 box.height
-        |> move
-            (box.width
-                / 2
-            )
-            0
-    , rectangle red 1 box.height
-        |> move
-            -(box.width
-                / 2
-             )
-            0
-    , rectangle red box.width 1
-        |> move 0
-            (box.height
-                / 2
-            )
-    , rectangle red box.width 1
-        |> move 0
-            -(box.height
-                / 2
-             )
+viewBall : Ball -> Shape
+viewBall ball =
+    square blue ballLength
+        |> move ball.x ball.y
+
+
+viewBox : Shape
+viewBox =
+    [ rectangle red 1 windowHeight
+        |> move (windowWidth / 2) 0
+    , rectangle red 1 windowHeight
+        |> move -(windowWidth / 2) 0
+    , rectangle red windowWidth 1
+        |> move 0 (windowHeight / 2)
+    , rectangle red windowWidth 1
+        |> move 0 -(windowHeight / 2)
     ]
         |> group
 
 
 update : Computer -> Memory -> Memory
 update computer memory =
+    let
+        leftPaddleMovementKeys =
+            { upKey = "w", downKey = "s" }
+
+        rightPaddleMovementKeys =
+            { upKey = "ArrowUp", downKey = "ArrowDown" }
+
+        { movedBall, touchedSide } =
+            moveBall
+                memory.playerLeft
+                memory.playerRight
+                memory.ball
+    in
     { memory
-        | ball = moveBall memory.box memory.ball memory.playerLeft memory.playerRight
-        , playerLeft = updatePlayer memory.playerLeft memory.box memory.ball computer
-        , playerRight = updatePlayer memory.playerRight memory.box memory.ball computer
+        | ball = movedBall
+        , playerLeft =
+            movePlayerPaddle
+                leftPaddleMovementKeys
+                computer.keyboard.keys
+                memory.playerLeft
+        , playerRight =
+            movePlayerPaddle
+                rightPaddleMovementKeys
+                computer.keyboard.keys
+                memory.playerRight
     }
+        |> scoreAPointIfSideTouched touchedSide
 
 
-moveBall : Box -> Ball -> Player -> Player -> Ball
-moveBall box ball playerLeft playerRight =
+moveBall : Player -> Player -> Ball -> { movedBall : Ball, touchedSide : Maybe PlayerSide }
+moveBall playerLeft playerRight =
     let
         halfWidth =
-            box.width / 2
+            windowWidth / 2
 
         halfHeight =
-            box.height / 2
+            windowHeight / 2
 
-        bsX =
-            ball.speedX
+        halfBallLength =
+            ballLength / 2
 
-        bsY =
-            ball.speedY
+        bounceOffBox ball =
+            let
+                updateXSpeed xSpeedUpdate =
+                    { ball | speedX = xSpeedUpdate ball.speedX }
 
-        bx =
-            ball.x
+                updateYSpeed ySpeedUpdate =
+                    { ball | speedY = ySpeedUpdate ball.speedY }
+            in
+            -- Only possible if missed by paddle
+            if ball.x + halfBallLength > halfWidth then
+                { movedBall = updateXSpeed (\a -> -(abs a))
+                , touchedSide = Just RightSide
+                }
 
-        by =
-            ball.y
+            else if ball.x - halfBallLength < -halfWidth then
+                { movedBall = updateXSpeed abs
+                , touchedSide = Just LeftSide
+                }
 
-        clashDistanceX =
-            (initLeftPaddle.thick + initialBall.length) / 2
+            else
+                { touchedSide = Nothing
+                , movedBall =
+                    if ball.y + halfBallLength > halfHeight then
+                        updateYSpeed (\a -> -(abs a))
 
-        clashDistanceY =
-            (initLeftPaddle.length + initialBall.length) / 2
-    in
-    case playerLeft of
-        PlayerLeft leftInfo ->
-            case playerRight of
-                PlayerRight rightInfo ->
-                    -- Only possible if missed by paddle
-                    if bx > halfWidth && bsX > 0 then
-                        reverseXBallUpdate ball
-
-                    else if by > halfHeight && bsY > 0 then
-                        reverseYBallUpdate ball
-
-                    else if bx < -halfWidth && bsX < 0 then
-                        reverseXBallUpdate ball
-
-                    else if by < -halfHeight && bsY < 0 then
-                        reverseYBallUpdate ball
-                        -- Have to check if the Paddle crash with the ball below
-
-                    else if (diff bx leftInfo.paddle.x < clashDistanceX) || (diff bx rightInfo.paddle.x < clashDistanceX) then
-                        if (diff bx leftInfo.paddle.x < clashDistanceX) && (diff leftInfo.paddle.y ball.y < clashDistanceY) then
-                            reverseXBallUpdate ball
-
-                        else if (diff bx rightInfo.paddle.x < clashDistanceX) && (diff rightInfo.paddle.y ball.y < clashDistanceY) then
-                            reverseXBallUpdate ball
-
-                        else
-                            defaultBallUpdate ball
+                    else if ball.y - halfBallLength < -halfHeight then
+                        updateYSpeed abs
 
                     else
-                        defaultBallUpdate ball
+                        ball
+                }
 
-                -- Not Possible
-                PlayerLeft _ ->
-                    defaultBallUpdate ball
+        bounceOffPaddels ball =
+            let
+                clashDistanceX =
+                    (paddleThick + ballLength) / 2
 
-        -- Not Possible
-        PlayerRight _ ->
-            defaultBallUpdate ball
+                clashDistanceY =
+                    (paddleLength + ballLength) / 2
+
+                reverseSpeedX =
+                    { ball | speedX = -ball.speedX }
+
+                updateXSpeed xSpeedUpdate =
+                    { ball | speedX = xSpeedUpdate ball.speedX }
+
+                updateYSpeed ySpeedUpdate =
+                    { ball | speedY = ySpeedUpdate ball.speedY }
+            in
+            -- Have to check if the Paddle crash with the ball below
+            if
+                (diff ball.x (paddleX LeftSide) < clashDistanceX)
+                    && (diff playerLeft.paddleY ball.y < clashDistanceY)
+            then
+                updateXSpeed abs
+
+            else if
+                (diff ball.x (paddleX RightSide) < clashDistanceX)
+                    && (diff playerRight.paddleY ball.y < clashDistanceY)
+            then
+                updateXSpeed (\a -> -(abs a))
+
+            else
+                ball
+    in
+    moveBallByXYSpeed
+        >> bounceOffPaddels
+        >> bounceOffBox
 
 
-reverseXBallUpdate : Ball -> Ball
-reverseXBallUpdate ball =
-    { ball
-        | speedX = ball.speedX * -1
-    }
-        |> defaultBallUpdate
-
-
-reverseYBallUpdate : Ball -> Ball
-reverseYBallUpdate ball =
-    { ball
-        | speedY = ball.speedY * -1
-    }
-        |> defaultBallUpdate
-
-
-defaultBallUpdate : Ball -> Ball
-defaultBallUpdate ball =
+moveBallByXYSpeed : Ball -> Ball
+moveBallByXYSpeed ball =
     { ball
         | x = ball.x + ball.speedX
         , y = ball.y + ball.speedY
@@ -279,82 +267,54 @@ defaultBallUpdate ball =
 
 
 diff : Float -> Float -> Float
-diff first second =
-    if first >= second then
-        first - second
-
-    else
-        second - first
+diff a b =
+    abs (a - b)
 
 
-updatePlayer : Player -> Box -> Ball -> Computer -> Player
-updatePlayer player box ball computer =
-    -- let
-    --     _ =
-    --         Debug.log "Key pressed" computer.keyboard.keys
-    -- in
-    if (box.width / 2) < ball.x then
-        case player of
-            PlayerRight playerInfo ->
-                { playerInfo | score = playerInfo.score + 1 }
-                    |> PlayerRight
+scoreAPointIfSideTouched side players =
+    let
+        scoreAPoint player =
+            { player | score = player.score + 1 }
+    in
+    case side of
+        Just LeftSide ->
+            { players
+                | playerRight =
+                    scoreAPoint players.playerRight
+            }
 
-            PlayerLeft playerInfo ->
-                playerInfo
-                    |> PlayerLeft
+        Just RightSide ->
+            { players
+                | playerLeft =
+                    scoreAPoint players.playerLeft
+            }
 
-    else if -(box.width / 2) > ball.x then
-        case player of
-            PlayerRight playerInfo ->
-                playerInfo
-                    |> PlayerRight
+        Nothing ->
+            players
 
-            PlayerLeft playerInfo ->
-                { playerInfo | score = playerInfo.score + 1 }
-                    |> PlayerLeft
 
-    else
-        case player of
-            PlayerRight playerInfo ->
-                if Set.member "ArrowUp" computer.keyboard.keys && playerInfo.paddle.y < 300 then
-                    { playerInfo
-                        | paddle =
-                            { initRightPaddle
-                                | y = playerInfo.paddle.y + 10
-                            }
-                    }
-                        |> PlayerRight
+movePlayerPaddle paddleMovementKeys keys player =
+    { player
+        | paddleY =
+            updatePaddleY
+                paddleMovementKeys
+                keys
+                player.paddleY
+    }
 
-                else if Set.member "ArrowDown" computer.keyboard.keys && playerInfo.paddle.y > -300 then
-                    { playerInfo
-                        | paddle =
-                            { initRightPaddle
-                                | y = playerInfo.paddle.y - 10
-                            }
-                    }
-                        |> PlayerRight
 
-                else
-                    playerInfo |> PlayerRight
+updatePaddleY { upKey, downKey } keys =
+    let
+        move paddleY =
+            if Set.member upKey keys then
+                paddleY + 10
 
-            PlayerLeft playerInfo ->
-                if Set.member "w" computer.keyboard.keys && playerInfo.paddle.y < 300 then
-                    { playerInfo
-                        | paddle =
-                            { initLeftPaddle
-                                | y = playerInfo.paddle.y + 10
-                            }
-                    }
-                        |> PlayerLeft
+            else if Set.member downKey keys then
+                paddleY - 10
 
-                else if Set.member "s" computer.keyboard.keys && playerInfo.paddle.y > -300 then
-                    { playerInfo
-                        | paddle =
-                            { initLeftPaddle
-                                | y = playerInfo.paddle.y - 10
-                            }
-                    }
-                        |> PlayerLeft
-
-                else
-                    playerInfo |> PlayerLeft
+            else
+                paddleY
+    in
+    move
+        >> min (windowHeight / 2 - paddleLength / 2)
+        >> max -(windowHeight / 2 - paddleLength / 2)
