@@ -1,7 +1,7 @@
 {
   "main.css": "/pong_new/static/css/main.0af5c45f.chunk.css",
-  "main.js": "/pong_new/static/js/main.df38e01f.chunk.js",
-  "main.js.map": "/pong_new/static/js/main.df38e01f.chunk.js.map",
+  "main.js": "/pong_new/static/js/main.51fec8c1.chunk.js",
+  "main.js.map": "/pong_new/static/js/main.51fec8c1.chunk.js.map",
   "runtime~main.js": "/pong_new/static/js/runtime~main.814b7cee.js",
   "runtime~main.js.map": "/pong_new/static/js/runtime~main.814b7cee.js.map",
   "vendors~main.js": "/pong_new/static/js/vendors~main.0b49ec49.chunk.js",
@@ -11,5 +11,5 @@
   "index.html": "/pong_new/index.html",
   "logo.svg": "/pong_new/logo.svg",
   "manifest.json": "/pong_new/manifest.json",
-  "precache-manifest.20bcb81bea222e1efb54849b29d99863.js": "/pong_new/precache-manifest.20bcb81bea222e1efb54849b29d99863.js"
+  "precache-manifest.be78de3d014b100a4108e1b2ad67f495.js": "/pong_new/precache-manifest.be78de3d014b100a4108e1b2ad67f495.js"
 }

@@ -4,7 +4,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/pong_new/favicon.ico"
   },
   {
-    "revision": "a8f4f8cad43e6492f4496fb8beeb927c",
+    "revision": "cce1d1e58fef6dadae33df8e31c695f5",
     "url": "/pong_new/index.html"
   },
   {
@@ -16,12 +16,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/pong_new/manifest.json"
   },
   {
-    "revision": "df38e01f6416b2c0a040",
+    "revision": "51fec8c1bc290cab042a",
     "url": "/pong_new/static/css/main.0af5c45f.chunk.css"
   },
   {
-    "revision": "df38e01f6416b2c0a040",
-    "url": "/pong_new/static/js/main.df38e01f.chunk.js"
+    "revision": "51fec8c1bc290cab042a",
+    "url": "/pong_new/static/js/main.51fec8c1.chunk.js"
   },
   {
     "revision": "814b7cee1581bb8a34ce",
